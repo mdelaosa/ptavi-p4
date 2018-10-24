@@ -15,6 +15,7 @@ class SIPRegisterHandler(socketserver.DatagramRequestHandler):
     Echo server class
     """
     diccionario = {}
+
     def handle(self):
         """
         handle method of the server class
@@ -23,14 +24,14 @@ class SIPRegisterHandler(socketserver.DatagramRequestHandler):
         self.wfile.write(b"SIP/2.0 200 OK\r\n\r\n")
         IPc = self.client_address[0]  # IP del Cliente
         PORTc = self.client_address[1]  # Puerto del Cliente
-        #print('IP:', IPc, 'PORT:', PORTc)
+        # print('IP:', IPc, 'PORT:', PORTc)
         for line in self.rfile:
             if line:
                 if line.decode('utf-8') == 'REGISTER':
                     print("El cliente nos manda ", line.decode('utf-8'))
                     user = line.decode('utf-8')
                     self.diccionario["IP"] = IPc  # Diccionario con la IP
-                    self.diccionario["USER"] = user  # Diccionario con el Usuario
+                    self.diccionario["USER"] = user  # Dicc con el Usuario
         print(self.diccionario)
 
 
