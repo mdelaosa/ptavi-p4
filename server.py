@@ -21,15 +21,12 @@ class SIPRegisterHandler(socketserver.DatagramRequestHandler):
         (all requests will be handled by this method)
         """
         self.wfile.write(b"SIP/2.0 200 OK\r\n\r\n")
-        #IPc = self.client_address[0]  # IP del Cliente
-        #PORTc = self.client_address[1]  # Puerto del Cliente
-        #print('IP:', IPc, 'PORT:', PORTc)
+        print(self.client_address)
         for line in self.rfile:
-            if line.decode('utf-8') == 'REGISTER':
+            if line.decode('utf-8')[:8]== 'REGISTER':
                 print("El cliente nos manda ", line.decode('utf-8'))
-                user = line.decode('utf-8')
-                self.dicc['IP'] = self.client_address[0]  # Dicc con la IP
-                #self.dicc["USER"] = user  # Dicc con el Usuario
+                self.dicc['USER'] = line.decode('utf-8')[13:-10]
+                self.dicc['IP'] = self.client_address[0]
         print(self.dicc)
 
 
