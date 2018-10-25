@@ -8,22 +8,20 @@ import socket
 import sys
 
 # Constantes. Dirección IP del servidor y contenido a enviar
-SERVER = sys.argv[1]  # IP del Servidor
-PORT = int(sys.argv[2])  # Puerto en el que ejecuta
-LINE = sys.argv[3:]  # Método y usuario
+try:
+    SERVER, PORT, METHOD, USER, EXVAL = sys.argv[1:]
+except ValueError:
+    sys.exit('INSERT: SERVER, PORT, METHOD, USER AND EXVAL')
+REGISTER = 'REGISTER sip:' + USER + ' SIP/2.0\nEXPIRES: ' + EXVAL + '\r\n\r\n'
 
 # Creamos el socket, lo configuramos y lo atamos a un servidor/puerto
 with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as my_socket:
-    my_socket.connect((SERVER, PORT))
-    REGISTERSIP = ' '.join(LINE)
-    if REGISTERSIP != "":
-        if LINE[0] == 'register':
-            REGISTER = 'REGISTER sip:' + LINE[1] + ' SIP/2.0\r\n'
-            print("Enviando:", REGISTERSIP)
-        my_socket.send(bytes(REGISTERSIP, 'utf-8') + b'\r\n')
-        data = my_socket.recv(1024)
-        print('Recibido -- ', data.decode('utf-8'))
-    else:
-        print('No hay mensaje')
+    my_socket.connect((SERVER, int(PORT)))
+    my_socket.send(bytes(REGISTER, 'utf-8') + b'\r\n')
+    try:
+        data = my_socket.recv(1024).decode('utf-8')
+        print('RECEIVED -- ', data)
+    except ConnectionRefusedError:
+        print('CONNECTION ERROR')
 
 print("Socket terminado.")
