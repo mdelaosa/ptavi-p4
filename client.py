@@ -15,12 +15,12 @@ LINE = sys.argv[3:]  # Método y usuario
 # Creamos el socket, lo configuramos y lo atamos a un servidor/puerto
 with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as my_socket:
     my_socket.connect((SERVER, PORT))
-    registersip = ' '.join(LINE)
-    if registersip != "":
+    REGISTERSIP = ' '.join(LINE)
+    if REGISTERSIP != "":
         if LINE[0] == 'register':
-            registersip = 'REGISTER sip:' + LINE[1] + ' SIP/2.0\r\n'  # Método + Usuario
-            print("Enviando:", registersip)
-        my_socket.send(bytes(registersip, 'utf-8') + b'\r\n')
+            REGISTER = 'REGISTER sip:' + LINE[1] + ' SIP/2.0\r\n'
+            print("Enviando:", REGISTERSIP)
+        my_socket.send(bytes(REGISTERSIP, 'utf-8') + b'\r\n')
         data = my_socket.recv(1024)
         print('Recibido -- ', data.decode('utf-8'))
     else:
