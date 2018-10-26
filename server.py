@@ -1,43 +1,56 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 """
-Clase (y programa principal) para un servidor de eco en UDP simple
+Clase (y programa principal) para un servidor de SIP en UDP simple
 """
 
 import socketserver
 import sys
+import json
+import time
 
-PORT = int(sys.argv[1])  # Puerto en el que escuchamos
-
-
-class SIPRegisterHandler(socketserver.DatagramRequestHandler):
+class SIPRegistrerHandler(socketserver.DatagramRequestHandler):
     """
-    Echo server class
+        SIP server class
     """
-    dicc = {}
 
     def handle(self):
-        """
-        handle method of the server class
-        (all requests will be handled by this method)
-        """
-        self.wfile.write(b"SIP/2.0 200 OK\r\n\r\n")
-        print(self.client_address)
-        for line in self.rfile:
-            if line.decode('utf-8')[:8] == 'REGISTER':
-                print("El cliente nos manda ", line.decode('utf-8'))
-                self.dicc['USER'] = line.decode('utf-8')[13:-10]
-                self.dicc['IP'] = self.client_address[0]
-        print(self.dicc)
+
+        while 1:
+            #Leyendo lo que envia el cliente.
+            line = self.rfile.read()
+            line_client = line.decode('utf-8').split()
+            if not line:
+                break  # Termina el bucle infinito
+            else:
+                print("RECEIVED \r\n")
+
+            if line_client[0] == 'REGISTER':
+                # Guardamos dirección e IP en nuestro diccionario.
+                servidor = line_client[1].split(':')
+                user = servidor[1]
+                dicc['IP'] = self.client_address[0]
+                dicc['SERVER'] = user
+                self.wfile.write(b"SIP/2.0 200 OK" + b'\r\n')
+                print(dicc)
+                if line_client[3] == '0':
+                    print("DELETING DIC")
+                    del dicc['IP'], dicc['SERVER']
+                    self.wfile.write(b"SIP/2.0 200 OK" + b'\r\n\r\n')
 
 
 if __name__ == "__main__":
-    # Listens at localhost ('') port which I want
-    # and calls the EchoHandler class to manage the request
-    serv = socketserver.UDPServer(('', PORT), SIPRegisterHandler)
 
-    print("Lanzando servidor UDP de eco...")
+    dicc = {}
     try:
+        PORT = int(sys.argv[1])
+    except IndexError:
+        sys.exit("Debe introducir: server.py port_number")
+    """Creamos UDP en el puerto que indicamos utilizando la clase."""
+    serv = socketserver.UDPServer(('', PORT), SIPRegistrerHandler)
+    print("Iniciando servidor... \r\n")
+    try:
+        """Creamos el servidor"""
         serv.serve_forever()
     except KeyboardInterrupt:
         print("Finalizado servidor")
