@@ -32,11 +32,13 @@ class SIPRegistrerHandler(socketserver.DatagramRequestHandler):
                 dicc['IP'] = self.client_address[0]
                 dicc['SERVER'] = user
                 self.wfile.write(b"SIP/2.0 200 OK" + b'\r\n')
-                print(dicc)
-                if line_client[3] == '0':
+                if line_client[4] == '0':
                     print("DELETING DIC")
                     del dicc['IP'], dicc['SERVER']
-                    self.wfile.write(b"SIP/2.0 200 OK" + b'\r\n\r\n')
+                    self.wfile.write(b"DELETING DIC" + b'\r\n\r\n')
+                    print(dicc)
+                else:
+                    print(dicc)
 
 
 if __name__ == "__main__":
