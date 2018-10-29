@@ -1,8 +1,6 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
-"""
-Clase (y programa principal) para un servidor de eco en UDP simple
-"""
+"""Class and main program for a server."""
 
 import socketserver
 import sys
@@ -11,14 +9,10 @@ import json
 
 
 class SIPRegisterHandler(socketserver.DatagramRequestHandler):
-    """
-    Echo server class
-    """
+    """Echo server class."""
+
     def handle(self):
-        """
-        handle method of the server class
-        (all requests will be handled by this method)
-        """
+        """Handle method of the server class."""
         while 1:
             line = self.rfile.read()  # Leyendo lo que envia el cliente.
             line_client = line.decode('utf-8').split()
@@ -27,8 +21,8 @@ class SIPRegisterHandler(socketserver.DatagramRequestHandler):
             else:
                 print("Petición recibida \r\n")
             if line_client[0] == 'REGISTER':
-                direccion = line_client[1].split(':')
-                USER = direccion[1]
+                direction = line_client[1].split(':')
+                USER = direction[1]
                 IP = self.client_address[0]
                 EXPIRES = int(line_client[4])
                 time_actual = int(time.time())
@@ -37,23 +31,28 @@ class SIPRegisterHandler(socketserver.DatagramRequestHandler):
                 time_exp = int(EXPIRES + time_actual)
                 time_exp_str = time.strftime('%Y-%m-%d %H:%M:%S',
                                              time.gmtime(time_exp))
-                self.lista = []
-                dicc[USER] = {'IP: ': IP, 'EXPIRES: ': time_exp_str}
+                self.list = []
+                dicc[USER] = {'IP': IP, 'EXPIRES': time_exp_str}
                 self.lista.append(dicc)
                 print('SIP/2.0 200 OK\r\n')
                 self.wfile.write(b"SIP/2.0 200 OK\r\n")  # Escritura socket
                 if line_client[4] == '0':
                     print('DELETING')
                     del dicc[USER]
-                    print(self.lista)
+                    print(self.list)
                 else:
-                    print(self.lista)
+                    print(self.list)
+
         self.register2json()
 
     def register2json(self):
+        """Create json file."""
         with open('registered.json', 'w') as archivo_json:
-            json.dump(self.lista, archivo_json, sort_keys=True,
+            json.dump(self.list, archivo_json, sort_keys=True,
                       indent=4, separators=(',', ':'))
+
+    def removeclient(self):
+        """Delete client once it has expired."""
 
 
 if __name__ == "__main__":
