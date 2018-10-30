@@ -13,10 +13,10 @@ class SIPRegisterHandler(socketserver.DatagramRequestHandler):
 
     def json2register(self):
         try:
-            with open('registered.json', 'r') as archivo_json:
-                self.dicc = json.load(archivo_json)
-        except:
-            pass
+            with open('registered.json', 'r') as jsonfile:
+                self.dicclient = json.load(jsonfile)
+        except (FileNotFoundError, ValueError):
+            self.dicclient = {}
 
     def register2json(self):
         """Create json file."""
@@ -26,6 +26,7 @@ class SIPRegisterHandler(socketserver.DatagramRequestHandler):
 
     def handle(self):
         """Handle method of the server class."""
+        self.json2register()
         while 1:
             line = self.rfile.read()  # Leyendo lo que envia el cliente.
             line_client = line.decode('utf-8').split()
@@ -45,30 +46,25 @@ class SIPRegisterHandler(socketserver.DatagramRequestHandler):
                 time_exp_str = time.strftime('%Y-%m-%d %H:%M:%S',
                                              time.gmtime(time_exp))
                 self.list = []
+                if self.list == []:
+                    if self.dicclient != {}:
+                        self.list.append(self.dicclient)
                 dicc[user] = {'IP': ip, 'EXPIRES': time_exp_str}
                 self.list.append(dicc)
-
                 print('SIP/2.0 200 OK\r\n')
                 self.wfile.write(b"SIP/2.0 200 OK\r\n")  # Escritura socket
                 if line_client[4] == '0':
                     print('DELETING')
                     del dicc[user]
-                    print(self.list)
+                    print('USERS:', self.list)
                 else:
-                    print(self.list)
-                if time_actual_str >= time_exp_str:
-                    del dicc[user]
+                    print('USERS:', self.list)
         self.register2json()
-
-
-    def removeclient(self):
-        """Delete client once it has expired."""
-
-
 
 
 if __name__ == "__main__":
 
+    dicclient = {}
     dicc = {}
     try:
         PORT = int(sys.argv[1])
